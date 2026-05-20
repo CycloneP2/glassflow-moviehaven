@@ -9,38 +9,153 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SearchRouteImport } from './routes/search'
+import { Route as KomikRouteImport } from './routes/komik'
+import { Route as AiRouteImport } from './routes/ai'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as KomikIdRouteImport } from './routes/komik.$id'
+import { Route as BrowseProviderRouteImport } from './routes/browse.$provider'
+import { Route as WatchProviderIdRouteImport } from './routes/watch.$provider.$id'
+import { Route as TitleProviderIdRouteImport } from './routes/title.$provider.$id'
 
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KomikRoute = KomikRouteImport.update({
+  id: '/komik',
+  path: '/komik',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AiRoute = AiRouteImport.update({
+  id: '/ai',
+  path: '/ai',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const KomikIdRoute = KomikIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => KomikRoute,
+} as any)
+const BrowseProviderRoute = BrowseProviderRouteImport.update({
+  id: '/browse/$provider',
+  path: '/browse/$provider',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WatchProviderIdRoute = WatchProviderIdRouteImport.update({
+  id: '/watch/$provider/$id',
+  path: '/watch/$provider/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TitleProviderIdRoute = TitleProviderIdRouteImport.update({
+  id: '/title/$provider/$id',
+  path: '/title/$provider/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/ai': typeof AiRoute
+  '/komik': typeof KomikRouteWithChildren
+  '/search': typeof SearchRoute
+  '/browse/$provider': typeof BrowseProviderRoute
+  '/komik/$id': typeof KomikIdRoute
+  '/title/$provider/$id': typeof TitleProviderIdRoute
+  '/watch/$provider/$id': typeof WatchProviderIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/ai': typeof AiRoute
+  '/komik': typeof KomikRouteWithChildren
+  '/search': typeof SearchRoute
+  '/browse/$provider': typeof BrowseProviderRoute
+  '/komik/$id': typeof KomikIdRoute
+  '/title/$provider/$id': typeof TitleProviderIdRoute
+  '/watch/$provider/$id': typeof WatchProviderIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/ai': typeof AiRoute
+  '/komik': typeof KomikRouteWithChildren
+  '/search': typeof SearchRoute
+  '/browse/$provider': typeof BrowseProviderRoute
+  '/komik/$id': typeof KomikIdRoute
+  '/title/$provider/$id': typeof TitleProviderIdRoute
+  '/watch/$provider/$id': typeof WatchProviderIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/ai'
+    | '/komik'
+    | '/search'
+    | '/browse/$provider'
+    | '/komik/$id'
+    | '/title/$provider/$id'
+    | '/watch/$provider/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/ai'
+    | '/komik'
+    | '/search'
+    | '/browse/$provider'
+    | '/komik/$id'
+    | '/title/$provider/$id'
+    | '/watch/$provider/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/ai'
+    | '/komik'
+    | '/search'
+    | '/browse/$provider'
+    | '/komik/$id'
+    | '/title/$provider/$id'
+    | '/watch/$provider/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AiRoute: typeof AiRoute
+  KomikRoute: typeof KomikRouteWithChildren
+  SearchRoute: typeof SearchRoute
+  BrowseProviderRoute: typeof BrowseProviderRoute
+  TitleProviderIdRoute: typeof TitleProviderIdRoute
+  WatchProviderIdRoute: typeof WatchProviderIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/komik': {
+      id: '/komik'
+      path: '/komik'
+      fullPath: '/komik'
+      preLoaderRoute: typeof KomikRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ai': {
+      id: '/ai'
+      path: '/ai'
+      fullPath: '/ai'
+      preLoaderRoute: typeof AiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +163,56 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/komik/$id': {
+      id: '/komik/$id'
+      path: '/$id'
+      fullPath: '/komik/$id'
+      preLoaderRoute: typeof KomikIdRouteImport
+      parentRoute: typeof KomikRoute
+    }
+    '/browse/$provider': {
+      id: '/browse/$provider'
+      path: '/browse/$provider'
+      fullPath: '/browse/$provider'
+      preLoaderRoute: typeof BrowseProviderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/watch/$provider/$id': {
+      id: '/watch/$provider/$id'
+      path: '/watch/$provider/$id'
+      fullPath: '/watch/$provider/$id'
+      preLoaderRoute: typeof WatchProviderIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/title/$provider/$id': {
+      id: '/title/$provider/$id'
+      path: '/title/$provider/$id'
+      fullPath: '/title/$provider/$id'
+      preLoaderRoute: typeof TitleProviderIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
+interface KomikRouteChildren {
+  KomikIdRoute: typeof KomikIdRoute
+}
+
+const KomikRouteChildren: KomikRouteChildren = {
+  KomikIdRoute: KomikIdRoute,
+}
+
+const KomikRouteWithChildren = KomikRoute._addFileChildren(KomikRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AiRoute: AiRoute,
+  KomikRoute: KomikRouteWithChildren,
+  SearchRoute: SearchRoute,
+  BrowseProviderRoute: BrowseProviderRoute,
+  TitleProviderIdRoute: TitleProviderIdRoute,
+  WatchProviderIdRoute: WatchProviderIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
