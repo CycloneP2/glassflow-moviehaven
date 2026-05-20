@@ -10,12 +10,20 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SearchRouteImport } from './routes/search'
+import { Route as AiRouteImport } from './routes/ai'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BrowseProviderRouteImport } from './routes/browse.$provider'
+import { Route as WatchProviderIdRouteImport } from './routes/watch.$provider.$id'
+import { Route as TitleProviderIdRouteImport } from './routes/title.$provider.$id'
 
 const SearchRoute = SearchRouteImport.update({
   id: '/search',
   path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AiRoute = AiRouteImport.update({
+  id: '/ai',
+  path: '/ai',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -28,35 +36,76 @@ const BrowseProviderRoute = BrowseProviderRouteImport.update({
   path: '/browse/$provider',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WatchProviderIdRoute = WatchProviderIdRouteImport.update({
+  id: '/watch/$provider/$id',
+  path: '/watch/$provider/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TitleProviderIdRoute = TitleProviderIdRouteImport.update({
+  id: '/title/$provider/$id',
+  path: '/title/$provider/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/ai': typeof AiRoute
   '/search': typeof SearchRoute
   '/browse/$provider': typeof BrowseProviderRoute
+  '/title/$provider/$id': typeof TitleProviderIdRoute
+  '/watch/$provider/$id': typeof WatchProviderIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/ai': typeof AiRoute
   '/search': typeof SearchRoute
   '/browse/$provider': typeof BrowseProviderRoute
+  '/title/$provider/$id': typeof TitleProviderIdRoute
+  '/watch/$provider/$id': typeof WatchProviderIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/ai': typeof AiRoute
   '/search': typeof SearchRoute
   '/browse/$provider': typeof BrowseProviderRoute
+  '/title/$provider/$id': typeof TitleProviderIdRoute
+  '/watch/$provider/$id': typeof WatchProviderIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/search' | '/browse/$provider'
+  fullPaths:
+    | '/'
+    | '/ai'
+    | '/search'
+    | '/browse/$provider'
+    | '/title/$provider/$id'
+    | '/watch/$provider/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/search' | '/browse/$provider'
-  id: '__root__' | '/' | '/search' | '/browse/$provider'
+  to:
+    | '/'
+    | '/ai'
+    | '/search'
+    | '/browse/$provider'
+    | '/title/$provider/$id'
+    | '/watch/$provider/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/ai'
+    | '/search'
+    | '/browse/$provider'
+    | '/title/$provider/$id'
+    | '/watch/$provider/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AiRoute: typeof AiRoute
   SearchRoute: typeof SearchRoute
   BrowseProviderRoute: typeof BrowseProviderRoute
+  TitleProviderIdRoute: typeof TitleProviderIdRoute
+  WatchProviderIdRoute: typeof WatchProviderIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -66,6 +115,13 @@ declare module '@tanstack/react-router' {
       path: '/search'
       fullPath: '/search'
       preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ai': {
+      id: '/ai'
+      path: '/ai'
+      fullPath: '/ai'
+      preLoaderRoute: typeof AiRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -82,14 +138,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BrowseProviderRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/watch/$provider/$id': {
+      id: '/watch/$provider/$id'
+      path: '/watch/$provider/$id'
+      fullPath: '/watch/$provider/$id'
+      preLoaderRoute: typeof WatchProviderIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/title/$provider/$id': {
+      id: '/title/$provider/$id'
+      path: '/title/$provider/$id'
+      fullPath: '/title/$provider/$id'
+      preLoaderRoute: typeof TitleProviderIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AiRoute: AiRoute,
   SearchRoute: SearchRoute,
   BrowseProviderRoute: BrowseProviderRoute,
+  TitleProviderIdRoute: TitleProviderIdRoute,
+  WatchProviderIdRoute: WatchProviderIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
