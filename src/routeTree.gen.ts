@@ -10,8 +10,10 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SearchRouteImport } from './routes/search'
+import { Route as KomikRouteImport } from './routes/komik'
 import { Route as AiRouteImport } from './routes/ai'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as KomikIdRouteImport } from './routes/komik.$id'
 import { Route as BrowseProviderRouteImport } from './routes/browse.$provider'
 import { Route as WatchProviderIdRouteImport } from './routes/watch.$provider.$id'
 import { Route as TitleProviderIdRouteImport } from './routes/title.$provider.$id'
@@ -19,6 +21,11 @@ import { Route as TitleProviderIdRouteImport } from './routes/title.$provider.$i
 const SearchRoute = SearchRouteImport.update({
   id: '/search',
   path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KomikRoute = KomikRouteImport.update({
+  id: '/komik',
+  path: '/komik',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AiRoute = AiRouteImport.update({
@@ -30,6 +37,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const KomikIdRoute = KomikIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => KomikRoute,
 } as any)
 const BrowseProviderRoute = BrowseProviderRouteImport.update({
   id: '/browse/$provider',
@@ -50,16 +62,20 @@ const TitleProviderIdRoute = TitleProviderIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/ai': typeof AiRoute
+  '/komik': typeof KomikRouteWithChildren
   '/search': typeof SearchRoute
   '/browse/$provider': typeof BrowseProviderRoute
+  '/komik/$id': typeof KomikIdRoute
   '/title/$provider/$id': typeof TitleProviderIdRoute
   '/watch/$provider/$id': typeof WatchProviderIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/ai': typeof AiRoute
+  '/komik': typeof KomikRouteWithChildren
   '/search': typeof SearchRoute
   '/browse/$provider': typeof BrowseProviderRoute
+  '/komik/$id': typeof KomikIdRoute
   '/title/$provider/$id': typeof TitleProviderIdRoute
   '/watch/$provider/$id': typeof WatchProviderIdRoute
 }
@@ -67,8 +83,10 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/ai': typeof AiRoute
+  '/komik': typeof KomikRouteWithChildren
   '/search': typeof SearchRoute
   '/browse/$provider': typeof BrowseProviderRoute
+  '/komik/$id': typeof KomikIdRoute
   '/title/$provider/$id': typeof TitleProviderIdRoute
   '/watch/$provider/$id': typeof WatchProviderIdRoute
 }
@@ -77,24 +95,30 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/ai'
+    | '/komik'
     | '/search'
     | '/browse/$provider'
+    | '/komik/$id'
     | '/title/$provider/$id'
     | '/watch/$provider/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/ai'
+    | '/komik'
     | '/search'
     | '/browse/$provider'
+    | '/komik/$id'
     | '/title/$provider/$id'
     | '/watch/$provider/$id'
   id:
     | '__root__'
     | '/'
     | '/ai'
+    | '/komik'
     | '/search'
     | '/browse/$provider'
+    | '/komik/$id'
     | '/title/$provider/$id'
     | '/watch/$provider/$id'
   fileRoutesById: FileRoutesById
@@ -102,6 +126,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AiRoute: typeof AiRoute
+  KomikRoute: typeof KomikRouteWithChildren
   SearchRoute: typeof SearchRoute
   BrowseProviderRoute: typeof BrowseProviderRoute
   TitleProviderIdRoute: typeof TitleProviderIdRoute
@@ -117,6 +142,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/komik': {
+      id: '/komik'
+      path: '/komik'
+      fullPath: '/komik'
+      preLoaderRoute: typeof KomikRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ai': {
       id: '/ai'
       path: '/ai'
@@ -130,6 +162,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/komik/$id': {
+      id: '/komik/$id'
+      path: '/$id'
+      fullPath: '/komik/$id'
+      preLoaderRoute: typeof KomikIdRouteImport
+      parentRoute: typeof KomikRoute
     }
     '/browse/$provider': {
       id: '/browse/$provider'
@@ -155,9 +194,20 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface KomikRouteChildren {
+  KomikIdRoute: typeof KomikIdRoute
+}
+
+const KomikRouteChildren: KomikRouteChildren = {
+  KomikIdRoute: KomikIdRoute,
+}
+
+const KomikRouteWithChildren = KomikRoute._addFileChildren(KomikRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AiRoute: AiRoute,
+  KomikRoute: KomikRouteWithChildren,
   SearchRoute: SearchRoute,
   BrowseProviderRoute: BrowseProviderRoute,
   TitleProviderIdRoute: TitleProviderIdRoute,
