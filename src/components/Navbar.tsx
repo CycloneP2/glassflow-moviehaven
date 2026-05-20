@@ -56,6 +56,13 @@ export function Navbar() {
             </Link>
           ))}
           <Link
+            to="/komik"
+            className="rounded-full px-3 py-1.5 text-sm text-muted-foreground transition hover:bg-white/10 hover:text-foreground"
+            activeProps={{ className: "rounded-full px-3 py-1.5 text-sm bg-white/10 text-foreground" }}
+          >
+            Komik
+          </Link>
+          <Link
             to="/ai"
             className="rounded-full px-3 py-1.5 text-sm text-muted-foreground transition hover:bg-white/10 hover:text-foreground"
             activeProps={{ className: "rounded-full px-3 py-1.5 text-sm bg-white/10 text-foreground" }}
@@ -123,6 +130,13 @@ export function Navbar() {
                   {p.name}
                 </Link>
               ))}
+              <Link
+                to="/komik"
+                onClick={() => setOpen(false)}
+                className="glass rounded-2xl px-3 py-2 text-sm"
+              >
+                Komik
+              </Link>
               <Link
                 to="/ai"
                 onClick={() => setOpen(false)}
