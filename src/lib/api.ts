@@ -1,5 +1,64 @@
-// Sansekai API client — all endpoints
+// Sansekai API client — all endpoints with advanced caching
 const BASE = "https://api.sansekai.my.id/api";
+
+// Memory cache untuk response cepat
+const memoryCache = new Map<string, { data: any; timestamp: number }>();
+const MEMORY_CACHE_TTL = 5 * 60 * 1000; // 5 menit
+const DISK_CACHE_TTL = 60 * 60 * 1000; // 1 jam
+
+// IndexedDB untuk persistent cache
+let db: IDBDatabase | null = null;
+
+async function initDB() {
+  if (db) return db;
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open("SansekaiCache", 1);
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => {
+      db = request.result;
+      resolve(db);
+    };
+    request.onupgradeneeded = (event) => {
+      const db = (event.target as IDBOpenDBRequest).result;
+      if (!db.objectStoreNames.contains("cache")) {
+        db.createObjectStore("cache", { keyPath: "key" });
+      }
+    };
+  });
+}
+
+async function getCacheFromDB(key: string) {
+  try {
+    const database = await initDB();
+    return new Promise((resolve) => {
+      const transaction = database.transaction(["cache"], "readonly");
+      const store = transaction.objectStore("cache");
+      const request = store.get(key);
+      request.onsuccess = () => {
+        const result = request.result;
+        if (result && Date.now() - result.timestamp < DISK_CACHE_TTL) {
+          resolve(result.data);
+        } else {
+          resolve(null);
+        }
+      };
+      request.onerror = () => resolve(null);
+    });
+  } catch {
+    return null;
+  }
+}
+
+async function setCacheInDB(key: string, data: any) {
+  try {
+    const database = await initDB();
+    const transaction = database.transaction(["cache"], "readwrite");
+    const store = transaction.objectStore("cache");
+    store.put({ key, data, timestamp: Date.now() });
+  } catch {
+    // Silently fail
+  }
+}
 
 async function get<T = any>(path: string, params?: Record<string, any>): Promise<T> {
   const url = new URL(BASE + path);
@@ -8,10 +67,38 @@ async function get<T = any>(path: string, params?: Record<string, any>): Promise
       if (v !== undefined && v !== null && v !== "") url.searchParams.set(k, String(v));
     }
   }
-  const res = await fetch(url.toString());
+
+  const cacheKey = url.toString();
+
+  // Check memory cache first (fastest)
+  const memCached = memoryCache.get(cacheKey);
+  if (memCached && Date.now() - memCached.timestamp < MEMORY_CACHE_TTL) {
+    return memCached.data as T;
+  }
+
+  // Check disk cache (fast)
+  const diskCached = await getCacheFromDB(cacheKey);
+  if (diskCached) {
+    // Restore to memory cache
+    memoryCache.set(cacheKey, { data: diskCached, timestamp: Date.now() });
+    return diskCached as T;
+  }
+
+  // Fetch from API
+  const res = await fetch(url.toString(), {
+    headers: {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+    },
+  });
+
   if (!res.ok) throw new Error(`API ${res.status}`);
   const json = await res.json();
   if (json?.error) throw new Error(json.message || json.error);
+
+  // Cache the result
+  memoryCache.set(cacheKey, { data: json, timestamp: Date.now() });
+  await setCacheInDB(cacheKey, json);
+
   return json as T;
 }
 
